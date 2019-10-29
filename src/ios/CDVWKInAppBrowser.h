@@ -38,6 +38,7 @@
 @property (nonatomic, retain) CDVWKInAppBrowserViewController* inAppBrowserViewController;
 @property (nonatomic, copy) NSString* callbackId;
 @property (nonatomic, copy) NSRegularExpression *callbackIdPattern;
+@property (nonatomic, assign) BOOL validatessl;
 
 + (id) getInstance;
 - (void)open:(CDVInvokedUrlCommand*)command;
@@ -70,6 +71,8 @@
 @property (nonatomic, weak) id <CDVScreenOrientationDelegate> orientationDelegate;
 @property (nonatomic, weak) CDVWKInAppBrowser* navigationDelegate;
 @property (nonatomic) NSURL* currentURL;
+@property (nonatomic, weak) NSURLRequest* urlRequest;
+@property (nonatomic, assign) BOOL validateSsl;
 
 - (void)close;
 - (void)navigateTo:(NSURL*)url;

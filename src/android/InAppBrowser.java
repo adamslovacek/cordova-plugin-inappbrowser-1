@@ -1236,7 +1236,7 @@ public class InAppBrowser extends CordovaPlugin {
          if (this.validateSsl) {
             super.onReceivedSslError(view, handler, error);
          } else {
-            Log.d(LOG_TAG, "Ignoring SSL certificate validation");
+            LOG.d(LOG_TAG, "Ignoring SSL certificate validation");
             handler.proceed();
          }
         }

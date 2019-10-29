@@ -657,7 +657,7 @@ public class InAppBrowser extends CordovaPlugin {
             if (hidden != null) {
                 openWindowHidden = hidden.equals("yes") ? true : false;
             }
-            Boolean sslValidation = features.get(VALIDATE_SSL);
+            Boolean sslValidation = Boolean.getBoolean( features.get(VALIDATE_SSL));
             if(sslValidation != null) {
                 validateSsl = sslValidation.booleanValue();
             }
@@ -1469,7 +1469,7 @@ public class InAppBrowser extends CordovaPlugin {
             if (this.validateSsl) {
                 super.onReceivedSslError(view, handler, error);
             } else {
-                Log.d(LOG_TAG, "Ignoring SSL certificate validation");
+                LOG.d(LOG_TAG, "Ignoring SSL certificate validation");
                 handler.proceed();
             }
         }

@@ -29,6 +29,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Color;
 import android.net.Uri;
+import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
@@ -75,6 +76,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.HashMap;
 import java.util.StringTokenizer;
+import android.webkit.SslErrorHandler;
 
 @SuppressLint("SetJavaScriptEnabled")
 public class InAppBrowser extends CordovaPlugin {
@@ -94,6 +96,8 @@ public class InAppBrowser extends CordovaPlugin {
     private static final String CLEAR_SESSION_CACHE = "clearsessioncache";
     private static final String HARDWARE_BACK_BUTTON = "hardwareback";
     private static final String MEDIA_PLAYBACK_REQUIRES_USER_ACTION = "mediaPlaybackRequiresUserAction";
+    private static final String VALIDATE_SSL = "validatessl";
+
     private static final String SHOULD_PAUSE = "shouldPauseOnSuspend";
     private static final Boolean DEFAULT_HARDWARE_BACK = true;
     private static final String USER_WIDE_VIEW_PORT = "useWideViewPort";
@@ -105,6 +109,7 @@ public class InAppBrowser extends CordovaPlugin {
     private static final String HIDE_URL = "hideurlbar";
     private static final String FOOTER = "footer";
     private static final String FOOTER_COLOR = "footercolor";
+	private boolean validateSsl = true;
 
     private static final List customizableOptions = Arrays.asList(CLOSE_BUTTON_CAPTION, TOOLBAR_COLOR, NAVIGATION_COLOR, CLOSE_BUTTON_COLOR, FOOTER_COLOR);
 
@@ -557,7 +562,8 @@ public class InAppBrowser extends CordovaPlugin {
         showZoomControls = true;
         openWindowHidden = false;
         mediaPlaybackRequiresUserGesture = false;
-
+        validateSsl = true;
+		
         if (features != null) {
             String show = features.get(LOCATION);
             if (show != null) {
@@ -595,6 +601,10 @@ public class InAppBrowser extends CordovaPlugin {
                 if (cache != null) {
                     clearSessionCache = cache.equals("yes") ? true : false;
                 }
+            }
+			Boolean sslValidation = Boolean.getBoolean(features.get(VALIDATE_SSL));
+            if(sslValidation != null) {
+            	validateSsl = sslValidation.booleanValue();
             }
             String shouldPause = features.get(SHOULD_PAUSE);
             if (shouldPause != null) {
@@ -879,6 +889,8 @@ public class InAppBrowser extends CordovaPlugin {
 
                 });
                 WebViewClient client = new InAppBrowserClient(thatWebView, edittext);
+				((InAppBrowserClient) client).setSslValidationFlag(validateSsl);
+
                 inAppWebView.setWebViewClient(client);
                 WebSettings settings = inAppWebView.getSettings();
                 settings.setJavaScriptEnabled(true);
@@ -1039,6 +1051,7 @@ public class InAppBrowser extends CordovaPlugin {
     public class InAppBrowserClient extends WebViewClient {
         EditText edittext;
         CordovaWebView webView;
+        boolean validateSsl = true;
 
         /**
          * Constructor.
@@ -1216,6 +1229,20 @@ public class InAppBrowser extends CordovaPlugin {
             } catch (JSONException ex) {
                 LOG.d(LOG_TAG, "Should never happen");
             }
+        }
+
+        @Override
+        public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+         if (this.validateSsl) {
+            super.onReceivedSslError(view, handler, error);
+         } else {
+            Log.d(LOG_TAG, "Ignoring SSL certificate validation");
+            handler.proceed();
+         }
+        }
+
+        public void setSslValidationFlag(boolean flag) {
+         this.validateSsl = flag;
         }
 
         /**
